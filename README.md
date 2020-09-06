@@ -4,6 +4,8 @@ Use a Microbit to track if the dog has been fed recently. Fills in the outer
 loop over the course of 6 hours, and starts flashing after this period has
 elapsed.
 
+Created as a learning project for Ada.
+
 ## Dependencies
 
 This project was built using GNAT community edition
