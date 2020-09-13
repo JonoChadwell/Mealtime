@@ -13,6 +13,9 @@ procedure Main is
    -- Frequency to flash at after time elapses
    FLASH_RATE_MS : constant MicroBit.Time.Time_Ms := 1000;
 
+   -- Speed of button pressed animation
+   ANIMATION_SPEED : constant MicroBit.Time.Time_Ms := 300;
+
    LastPress : MicroBit.Time.Time_Ms;
 
    subtype PipIndex is Integer range 1 .. MAX_PIPS;
@@ -62,7 +65,33 @@ begin
 
          MicroBit.Display.Clear;
 
-         if PipsOn < MAX_PIPS or (TimeSinceMeal / FLASH_RATE_MS) mod 2 = 0 then
+         if TimeSinceMeal < ANIMATION_SPEED then
+            -- Animation state 1 - middle dot
+            MicroBit.Display.Set(2, 2);
+
+         elsif TimeSinceMeal < ANIMATION_SPEED * 2 then
+            -- Animation state 2 - middle ring
+            MicroBit.Display.Set(1, 1);
+            MicroBit.Display.Set(1, 2);
+            MicroBit.Display.Set(1, 3);
+            MicroBit.Display.Set(2, 1);
+            MicroBit.Display.Set(2, 3);
+            MicroBit.Display.Set(3, 1);
+            MicroBit.Display.Set(3, 2);
+            MicroBit.Display.Set(3, 3);
+
+         elsif TimeSinceMeal < ANIMATION_SPEED * 3 then
+            -- Animation state 3 - outer ring
+            for Pip in 1 .. MAX_PIPS loop
+               declare
+                  PipCoordinates : constant Coordinate := GetPipCoordinate(Pip);
+               begin
+                  MicroBit.Display.Set(PipCoordinates.Col, PipCoordinates.Row);
+               end;
+            end loop;
+
+         elsif PipsOn < MAX_PIPS or (TimeSinceMeal / FLASH_RATE_MS) mod 2 = 0 then
+            -- Typical state, showing dots or flashed on
             for Pip in 1 .. Integer'Min(PipsOn, MAX_PIPS) loop
                declare
                   PipCoordinates : constant Coordinate := GetPipCoordinate(Pip);
@@ -70,6 +99,7 @@ begin
                   MicroBit.Display.Set(PipCoordinates.Col, PipCoordinates.Row);
                end;
             end loop;
+
          end if;
 
          MicroBit.Time.Delay_Ms(100);
